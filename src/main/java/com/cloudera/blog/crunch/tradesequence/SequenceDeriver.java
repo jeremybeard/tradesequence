@@ -27,7 +27,7 @@ import org.apache.hadoop.util.ToolRunner;
 
 @SuppressWarnings("serial")
 public class SequenceDeriver extends Configured implements Tool, Serializable {
-	public int run(String[] args) throws Exception {
+    public int run(String[] args) throws Exception {
         if (args.length != 2) {
             System.err.println("Usage: hadoop jar " + this.getClass().getName() + " input output");
             System.err.println();
@@ -50,31 +50,31 @@ public class SequenceDeriver extends Configured implements Tool, Serializable {
         
         // attach the stock symbol and the trade time to each trade record.
         // we use those values to correspondingly group and sort the trades
-		PTable<String, Pair<Long, Record>> keyedTrades =
-    		trades.parallelDo(new MapFn<Record, Pair<String, Pair<Long, Record>>>() {
-				@Override
-    			public Pair<String, Pair<Long, Record>> map(Record trade) {
-    			    String stock_symbol = trade.get("stock_symbol").toString();
-    			    Long trade_time = (Long)trade.get("trade_time");
-    			    return Pair.of(stock_symbol, Pair.of(trade_time, new Record(trade, true)));
-    			}
-    		}, Avros.tableOf(Avros.strings(), Avros.pairs(Avros.longs(), Avros.generics(tradeSchema))));
+        PTable<String, Pair<Long, Record>> keyedTrades =
+            trades.parallelDo(new MapFn<Record, Pair<String, Pair<Long, Record>>>() {
+                @Override
+                public Pair<String, Pair<Long, Record>> map(Record trade) {
+                    String stock_symbol = trade.get("stock_symbol").toString();
+                    Long trade_time = (Long)trade.get("trade_time");
+                    return Pair.of(stock_symbol, Pair.of(trade_time, new Record(trade, true)));
+                }
+            }, Avros.tableOf(Avros.strings(), Avros.pairs(Avros.longs(), Avros.generics(tradeSchema))));
         
         // group and sort the trades so we can iterate over each trade for a stock symbol in trade time order.
         // execute that iteration and populate the sequence number field with incrementing numbers for each stock's trade
-		PCollection<Record> sequencedTrades = 
-    		SecondarySort.sortAndApply(keyedTrades, new DoFn<Pair<String, Iterable<Pair<Long, Record>>>, Record>() {
-				@Override
-    		    public void process(Pair<String, Iterable<Pair<Long, Record>>> symbolTrades, Emitter<Record> emitter) {
-    		        Iterator<Pair<Long, Record>> trades = symbolTrades.second().iterator();
-    		        Integer seq = 0;
-    		        while (trades.hasNext()) {
-    		        	Record trade = trades.next().second();
-    		            trade.put("sequence_num", ++seq);
-    		            emitter.emit(new Record(trade, true));
-    		        }
-    		    }
-    		}, Avros.generics(tradeSchema));
+        PCollection<Record> sequencedTrades = 
+            SecondarySort.sortAndApply(keyedTrades, new DoFn<Pair<String, Iterable<Pair<Long, Record>>>, Record>() {
+                @Override
+                public void process(Pair<String, Iterable<Pair<Long, Record>>> symbolTrades, Emitter<Record> emitter) {
+                    Iterator<Pair<Long, Record>> trades = symbolTrades.second().iterator();
+                    Integer seq = 0;
+                    while (trades.hasNext()) {
+                        Record trade = trades.next().second();
+                        trade.put("sequence_num", ++seq);
+                        emitter.emit(new Record(trade, true));
+                    }
+                }
+            }, Avros.generics(tradeSchema));
         
         // write the processed trade records to Avro files on HDFS
         sequencedTrades.write(To.avroFile(outputPath));
@@ -84,9 +84,9 @@ public class SequenceDeriver extends Configured implements Tool, Serializable {
 
         return result.succeeded() ? 0 : 1;
     }
-	
-	public static void main(String[] args) throws Exception {
-		int result = ToolRunner.run(new Configuration(), new SequenceDeriver(), args);
-		System.exit(result);
-	}
+    
+    public static void main(String[] args) throws Exception {
+        int result = ToolRunner.run(new Configuration(), new SequenceDeriver(), args);
+        System.exit(result);
+    }
 }
