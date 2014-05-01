@@ -1,7 +1,7 @@
 Trade Sequence
 ==============
 
-This project demonstrates how to process time-series data using Apache Crunch.
+This project demonstrates how to process time-series data using [Apache Crunch](http://crunch.apache.org/index.html) using the simple example of sequencing trades for each stock by time.
 
 Running
 -------
