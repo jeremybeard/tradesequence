@@ -1,0 +1,10 @@
+{
+    "name": "trade_raw"
+  , "namespace": "com.cloudera.blog.crunch.tradesequence"
+  , "type": "record"
+  , "fields": [
+        {"name": "stock_symbol", "type": "string"}
+      , {"name": "trade_time", "type": "long"}
+      , {"name": "trade_price", "type": "double"}
+    ]
+}
