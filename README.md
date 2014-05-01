@@ -8,7 +8,7 @@ Running
 
 The compiled program can be run on a Hadoop cluster with:
 
-`hadoop jar target/tradesequence-0.0.1-SNAPSHOT-job.jar /hdfs/input/directory /hdfs/output/directory`
+`hadoop jar target/tradesequence-0.0.1-SNAPSHOT-job.jar /your/hdfs/input/directory /your/hdfs/output/directory`
 
 Test data
 ---------
